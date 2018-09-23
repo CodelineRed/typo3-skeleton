@@ -1,0 +1,43 @@
+{
+    "name": "insanitymeetshh/typo3-skeleton",
+    "description": "TYPO3 8.7 Skeleton",
+    "version": "0.1.0-dev",
+    "keywords": ["typo3", "typo3 8.7", "scriptmerger", "realurl", "gridelements", "bootstrap-grids", "dce", "news", "sourceopt", "skeleton"],
+    "homepage": "http://slim3.insanitymeetshh.net",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "InsanityMeetsHH",
+            "email": "software@insanitymeetshh.net",
+            "homepage": "http://www.insanitymeetshh.net"
+        }
+    ],
+    "repositories": [
+        { "type": "composer", "url": "https://composer.typo3.org/" }
+    ],
+    "require": {
+        "typo3/cms": "^8.7",
+        "typo3-ter/scriptmerger": "*",
+        "typo3-ter/realurl": "*",
+        "typo3-ter/gridelements": "*",
+        "typo3-ter/bootstrap-grids": "*",
+        "typo3-ter/dce": "*",
+        "typo3-ter/news": "*",
+        "typo3-ter/sourceopt": "*",
+        "helhum/typo3-console": "*"
+    },
+    "extra": {
+        "typo3/cms": {
+            "cms-package-dir": "{$vendor-dir}/typo3/cms",
+            "web-dir": "web"
+        }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "Application\\Composer\\Setup::postUpdateInstall"
+        ],
+        "post-update-cmd": [
+            "Application\\Composer\\Setup::postUpdateInstall"
+        ]
+    }
+}

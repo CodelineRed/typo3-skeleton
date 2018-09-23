@@ -1,0 +1,110 @@
+### Typo3 ###
+# Ignore several upload and file directories.
+web/fileadmin/user_upload/
+web/fileadmin/_temp_/
+web/fileadmin/_processed_/
+web/uploads/
+web/typo3conf/ext/
+web/typo3conf/l10n/
+# Ignore cache
+web/typo3conf/temp_CACHED*
+web/typo3conf/temp_fieldInfo.php
+web/typo3conf/deprecation_*.log
+web/typo3conf/ENABLE_INSTALL_TOOL
+web/typo3conf/realurl_autoconf.php
+web/FIRST_INSTALL
+# Ignore system folders, you should have them symlinked.
+# If not comment out the following entries.
+web/typo3
+web/typo3_src
+web/typo3_src-*
+web/Packages
+web/.htaccess
+web/index.php
+# Ignore temp directory.
+web/typo3temp/
+# Ignore config files.
+LocalConfiguration.php
+PackageStates.php
+composer.lock
+
+# Created by https://www.gitignore.io/api/linux,macos,windows,composer
+
+### Composer ###
+composer.phar
+/vendor/
+
+# Commit your application's lock file https://getcomposer.org/doc/01-basic-usage.md#commit-your-composer-lock-file-to-version-control
+# You may choose to ignore a library lock file http://getcomposer.org/doc/02-libraries.md#lock-file
+# composer.lock
+
+### Linux ###
+*~
+
+# temporary files which can be created if a process still has a handle open of a deleted file
+.fuse_hidden*
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+# .nfs files are created when an open file is removed but is still being accessed
+.nfs*
+
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+### Windows ###
+# Windows thumbnail cache files
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+
+# Dump file
+*.stackdump
+
+# Folder config file
+[Dd]esktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+
+# End of https://www.gitignore.io/api/typo3,linux,macos,windows,composer
