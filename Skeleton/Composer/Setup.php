@@ -1,10 +1,10 @@
 <?php
-namespace Application\Composer;
+namespace Skeleton\Composer;
 
 use Composer\Script\Event;
 
 class Setup {
-    public static function postUpdateInstall(Event $event) {
+    public static function run(Event $event) {
         $arrConfig = array();
 
         if (!file_exists(__DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php")) {

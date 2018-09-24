@@ -26,6 +26,11 @@
         "typo3-ter/sourceopt": "*",
         "helhum/typo3-console": "*"
     },
+    "autoload": {
+        "psr-4": {
+            "Skeleton\\Composer\\": "Skeleton/Composer/"
+        }
+    },
     "extra": {
         "typo3/cms": {
             "cms-package-dir": "{$vendor-dir}/typo3/cms",
@@ -34,10 +39,13 @@
     },
     "scripts": {
         "post-install-cmd": [
-            "Application\\Composer\\Setup::postUpdateInstall"
+            "Skeleton\\Composer\\Setup::run"
         ],
         "post-update-cmd": [
-            "Application\\Composer\\Setup::postUpdateInstall"
+            "Skeleton\\Composer\\Setup::run"
+        ],
+        "post-create-project-cmd": [
+            "Skeleton\\Composer\\Setup::run"
         ]
     }
 }
