@@ -4,6 +4,12 @@ namespace Skeleton\Composer;
 use Composer\Script\Event;
 
 class Setup {
+    
+    /**
+     * Generates AdditionalConfiguration.php and set up database
+     * 
+     * @param Event $event
+     */
     public static function run(Event $event) {
         $arrConfig = array();
 
@@ -11,15 +17,22 @@ class Setup {
             $arrConfig['database'] = array();
 
             // Ask for database name
-            echo "Please enter database name: ";
+            echo self::getColoredString("Please enter database name (default: ", 'green') . self::getColoredString("imhh_typo3_8", 'yellow') . self::getColoredString("): ", 'green');
             $strHandle = fopen("php://stdin", "r");
             echo "\n";
 
-            $arrConfig['database']['database'] = trim(fgets($strHandle));
+            $strDbName = trim(fgets($strHandle));
+            fclose($strHandle);
+
+            if (empty($strDbName)) {
+                $arrConfig['database']['dbname'] = "imhh_typo3_8";
+            } else {
+                $arrConfig['database']['dbname'] = $strDbName;
+            }
             fclose($strHandle);
 
             // ask for database host
-            echo "Please enter database host (default: \"127.0.0.1\"): ";
+            echo self::getColoredString("Please enter database host (default: ", 'green') . self::getColoredString("127.0.0.1", 'yellow') . self::getColoredString("): ", 'green');
             $strHandle = fopen("php://stdin", "r");
             echo "\n";
 
@@ -33,7 +46,7 @@ class Setup {
             }
 
             // ask for database port
-            echo "Please enter database port (default: 3306): ";
+            echo self::getColoredString("Please enter database port (default: ", 'green') . self::getColoredString("3306", 'yellow') . self::getColoredString("): ", 'green');
             $strHandle = fopen("php://stdin", "r");
             echo "\n";
 
@@ -47,7 +60,7 @@ class Setup {
             }
 
             // ask for database user
-            echo "Please enter database user (default: \"root\"): ";
+            echo self::getColoredString("Please enter database user (default: ", 'green') . self::getColoredString("root", 'yellow') . self::getColoredString("): ", 'green');
             $strHandle = fopen("php://stdin", "r");
             echo "\n";
 
@@ -61,7 +74,7 @@ class Setup {
             }
 
             // ask for database password
-            echo "Please enter database password (default: \"\"): ";
+            echo self::getColoredString("Please enter database password: ", 'green');
             $strHandle = fopen("php://stdin", "r");
             echo "\n";
 
@@ -89,7 +102,7 @@ class Setup {
 //            if ($answer == 'y' || $answer == 'yes' || $answer == 'Y' || $answer == 'Yes') {
 //                require_once __DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php";
 //                static::importDatabase(array(
-//                    'database'      => $GLOBALS['TYPO3_CONF_VARS']['DB']['database'],
+//                    'database'      => $GLOBALS['TYPO3_CONF_VARS']['DB']['dbname'],
 //                    'host'          => $GLOBALS['TYPO3_CONF_VARS']['DB']['host'],
 //                    'port'          => $GLOBALS['TYPO3_CONF_VARS']['DB']['port'],
 //                    'user'          => $GLOBALS['TYPO3_CONF_VARS']['DB']['username'],
@@ -98,7 +111,10 @@ class Setup {
 //            }
         }
     }
-
+    
+    /**
+     * @param array $configuration
+     */
     protected static function createDatabase($configuration) {
         $mysql = new \mysqli($configuration['host'], $configuration['user'], $configuration['password'], '', $configuration['port']);
 
@@ -106,21 +122,24 @@ class Setup {
             die("Connection failed: " . $mysql->connect_error);
         }
 
-        $sql = "CREATE DATABASE IF NOT EXISTS `". $configuration['database'] . "` CHARACTER SET utf8 COLLATE utf8_general_ci;";
+        $sql = "CREATE DATABASE IF NOT EXISTS `". $configuration['dbname'] . "` CHARACTER SET utf8 COLLATE utf8_general_ci;";
 
         if ($mysql->query($sql) === TRUE) {
-            echo "Database created successfully";
+            self::getColoredString("Database created successfully\n", 'green');
         } else {
-            echo "Error creating database: " . $mysql->error;
+            echo self::getColoredString("Error creating database: " . $mysql->error . "\n", 'red');
         }
 
         $mysql->close();
 
 //        static::importDatabase($configuration);
     }
-
+    
+    /**
+     * @param array $configuration
+     */
     protected static function importDatabase($configuration) {
-        $mysql = new \mysqli($configuration['host'], $configuration['user'], $configuration['password'], $configuration['database'], $configuration['port']);
+        $mysql = new \mysqli($configuration['host'], $configuration['user'], $configuration['password'], $configuration['dbname'], $configuration['port']);
 
         if ($mysql->connect_error) {
             die("Connection failed: " . $mysql->connect_error);
@@ -149,5 +168,62 @@ class Setup {
         }
 
         $mysql->close();
+    }
+    
+    /**
+     * Returns colored text for CLI
+     * 
+     * @param string $string
+     * @param string $foregroundColor
+     * @param string $backgroundColor
+     * @return string
+     */
+    protected static function getColoredString($string, $foregroundColor = null, $backgroundColor = null) {
+        $foregroundColors = [
+            'default' => '0',
+            'black' => '0;30',
+            'dark_gray' => '1;30',
+            'blue' => '0;34',
+            'light_blue' => '1;34',
+            'green' => '0;32',
+            'light_green' => '1;32',
+            'cyan' => '0;36',
+            'light_cyan' => '1;36',
+            'red' => '0;31',
+            'light_red' => '1;31',
+            'purple' => '0;35',
+            'light_purple' => '1;35',
+            'brown' => '0;33',
+            'yellow' => '0;33',
+            'light_gray' => '0;37',
+            'white' => '1;37',
+        ];
+        
+        $backgroundColors = [
+            'black' => '40',
+            'red' => '41',
+            'green' => '42',
+            'yellow' => '43',
+            'blue' => '44',
+            'magenta' => '45',
+            'cyan' => '46',
+            'light_gray' => '47'
+        ];
+
+        $coloredString = "";
+
+        // if given foreground color exists
+        if (isset($foregroundColors[$foregroundColor])) {
+            $coloredString .= "\033[" . $foregroundColors[$foregroundColor] . "m";
+        }
+        // if given background color exists
+        if (isset($backgroundColors[$backgroundColor])) {
+            $coloredString .= "\033[" . $backgroundColors[$backgroundColor] . "m";
+        }
+
+        // set default color at the end
+        $coloredString .= $string . "\033[0m";
+
+        return $coloredString;
     }
 }

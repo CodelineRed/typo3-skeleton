@@ -25,6 +25,7 @@ web/index.php
 web/typo3temp/
 # Ignore config files.
 LocalConfiguration.php
+AdditionalConfiguration.php
 PackageStates.php
 composer.lock
 

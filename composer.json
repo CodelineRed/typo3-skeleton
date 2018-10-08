@@ -1,7 +1,7 @@
 {
     "name": "insanitymeetshh/typo3-skeleton",
     "description": "TYPO3 8.7 Skeleton",
-    "version": "0.1.0-dev",
+    "version": "1.0.0-dev",
     "keywords": ["typo3", "typo3 8.7", "scriptmerger", "realurl", "gridelements", "bootstrap-grids", "dce", "news", "sourceopt", "skeleton"],
     "homepage": "http://slim3.insanitymeetshh.net",
     "license": "MIT",
@@ -16,15 +16,15 @@
         { "type": "composer", "url": "https://composer.typo3.org/" }
     ],
     "require": {
+        "georgringer/news": "*",
+        "helhum/typo3-console": "*",
         "typo3/cms": "^8.7",
-        "typo3-ter/scriptmerger": "*",
-        "typo3-ter/realurl": "*",
-        "typo3-ter/gridelements": "*",
         "typo3-ter/bootstrap-grids": "*",
         "typo3-ter/dce": "*",
-        "typo3-ter/news": "*",
-        "typo3-ter/sourceopt": "*",
-        "helhum/typo3-console": "*"
+        "typo3-ter/gridelements": "*",
+        "typo3-ter/realurl": "*",
+        "typo3-ter/scriptmerger": "*",
+        "typo3-ter/sourceopt": "*"
     },
     "autoload": {
         "psr-4": {
@@ -37,14 +37,17 @@
             "web-dir": "web"
         }
     },
+    "config": {
+        "process-timeout": 0,
+        "platform": {
+            "php": "7.1"
+        }
+    },
     "scripts": {
         "post-install-cmd": [
             "Skeleton\\Composer\\Setup::run"
         ],
         "post-update-cmd": [
-            "Skeleton\\Composer\\Setup::run"
-        ],
-        "post-create-project-cmd": [
             "Skeleton\\Composer\\Setup::run"
         ]
     }
