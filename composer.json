@@ -3,7 +3,7 @@
     "description": "TYPO3 8.7 Skeleton",
     "version": "1.0.0-dev",
     "keywords": ["typo3", "typo3 8.7", "scriptmerger", "realurl", "gridelements", "bootstrap-grids", "dce", "news", "sourceopt", "skeleton"],
-    "homepage": "http://slim3.insanitymeetshh.net",
+    "homepage": "https://github.com/InsanityMeetsHH/typo3-skeleton",
     "license": "MIT",
     "authors": [
         {
