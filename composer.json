@@ -13,14 +13,20 @@
         }
     ],
     "repositories": [
-        { "type": "composer", "url": "https://composer.typo3.org/" }
+        {
+            "type": "composer",
+            "url": "https://composer.typo3.org/"
+        }
     ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
+        "arminvieweg/dce": "*",
         "georgringer/news": "*",
         "helhum/typo3-console": "*",
+        "insanitymeetshh/typo3-base-ext": "dev-master",
         "typo3/cms": "^8.7",
         "typo3-ter/bootstrap-grids": "*",
-        "typo3-ter/dce": "*",
         "typo3-ter/gridelements": "*",
         "typo3-ter/realurl": "*",
         "typo3-ter/scriptmerger": "*",
@@ -44,11 +50,12 @@
         }
     },
     "scripts": {
+        "setup": "Skeleton\\Composer\\Setup::run",
         "post-install-cmd": [
-            "Skeleton\\Composer\\Setup::run"
+            "@setup"
         ],
         "post-update-cmd": [
-            "Skeleton\\Composer\\Setup::run"
+            "@setup"
         ]
     }
 }

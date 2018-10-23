@@ -18,15 +18,12 @@ web/FIRST_INSTALL
 web/typo3
 web/typo3_src
 web/typo3_src-*
-web/Packages
-web/.htaccess
 web/index.php
 # Ignore temp directory.
 web/typo3temp/
 # Ignore config files.
 LocalConfiguration.php
 AdditionalConfiguration.php
-PackageStates.php
 composer.lock
 
 # Created by https://www.gitignore.io/api/linux,macos,windows,composer

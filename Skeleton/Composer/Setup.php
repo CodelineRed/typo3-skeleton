@@ -11,6 +11,11 @@ class Setup {
      * @param Event $event
      */
     public static function run(Event $event) {
+        if (isset($_ENV['docker'])) {
+            echo self::getColoredString("Skipped App\\Composer\\Setup in Docker environment.\n", 'green');
+            return;
+        }
+        
         $arrConfig = array();
 
         if (!file_exists(__DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php")) {
@@ -179,6 +184,11 @@ class Setup {
      * @return string
      */
     protected static function getColoredString($string, $foregroundColor = null, $backgroundColor = null) {
+        // skip colors on windows operating system
+        if (strpos(strtolower(php_uname()), 'windows') !== FALSE) {
+            return $string;
+        }
+        
         $foregroundColors = [
             'default' => '0',
             'black' => '0;30',
