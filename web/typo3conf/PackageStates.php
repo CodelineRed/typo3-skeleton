@@ -29,6 +29,9 @@ return [
         'fluid_styled_content' => [
             'packagePath' => 'typo3/sysext/fluid_styled_content/',
         ],
+        'indexed_search' => [
+            'packagePath' => 'typo3/sysext/indexed_search/',
+        ],
         'info' => [
             'packagePath' => 'typo3/sysext/info/',
         ],

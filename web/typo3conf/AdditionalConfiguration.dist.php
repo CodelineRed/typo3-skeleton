@@ -1,11 +1,13 @@
 <?php
-$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['dbname'] = "";
-$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['host'] = "127.0.0.1";
+$GLOBALS['TYPO3_CONF_VARS']['FE']['pageNotFoundOnCHashError'] = FALSE;
+
+$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['dbname'] = '';
+$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['host'] = '127.0.0.1';
 $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['port'] = 3306;
-$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['user'] = "";
-$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['password'] = "";
-$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['driver'] = "mysqli";
-$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['charset'] = "utf8";
+$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['user'] = '';
+$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['password'] = '';
+$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['driver'] = 'mysqli';
+$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['charset'] = 'utf8';
 
 //$GLOBALS['TYPO3_CONF_VARS']['SYS']['displayErrors'] = '1';
 //$GLOBALS['TYPO3_CONF_VARS']['SYS']['devIPmask'] = '*';
