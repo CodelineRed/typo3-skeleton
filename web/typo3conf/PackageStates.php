@@ -137,14 +137,14 @@ return [
         'dce' => [
             'packagePath' => 'typo3conf/ext/dce/',
         ],
+        'imhh_t3base' => [
+            'packagePath' => 'typo3conf/ext/imhh_t3base/',
+        ],
         'scriptmerger' => [
             'packagePath' => 'typo3conf/ext/scriptmerger/',
         ],
         'sourceopt' => [
             'packagePath' => 'typo3conf/ext/sourceopt/',
-        ],
-        'typo3_base_ext' => [
-            'packagePath' => 'typo3conf/ext/typo3_base_ext/',
         ],
     ],
     'version' => 5,
