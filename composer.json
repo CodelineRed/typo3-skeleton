@@ -25,9 +25,8 @@
         "georgringer/news": "*",
         "helhum/typo3-console": "*",
         "insanitymeetshh/imhh-t3base": "dev-master",
+        "insanitymeetshh/bootstrap-grids": "^2.0",
         "typo3/cms": "^8.7",
-        "typo3-ter/bootstrap-grids": "*",
-        "typo3-ter/gridelements": "*",
         "typo3-ter/realurl": "*",
         "typo3-ter/scriptmerger": "*",
         "typo3-ter/sourceopt": "*"
