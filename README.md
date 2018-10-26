@@ -1,7 +1,7 @@
 # TYPO3 8 LTS - InsanityMeetsHH
 
 ## Included
-* [Bootstrap Grids](https://extensions.typo3.org/extension/bootstrap_grids/)
+* [Bootstrap 4 Grids](https://github.com/InsanityMeetsHH/bootstrap_grids)
 * [Dynamic Content Elements](https://extensions.typo3.org/extension/dce/)
 * [Grid Elements](https://extensions.typo3.org/extension/gridelements/)
 * [News system](https://extensions.typo3.org/extension/news/)
