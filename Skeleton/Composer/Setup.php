@@ -262,15 +262,13 @@ class Setup {
     protected static function setBackendUser() {
         require_once __DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php";
         $configuration = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
-        $mysql = new \mysqli($configuration['host'], $configuration['user'], $configuration['password'], '', $configuration['port']);
+        $mysql = new \mysqli($configuration['host'], $configuration['user'], $configuration['password'], $configuration['dbname'], $configuration['port']);
         $saltFactory = SaltFactory::getSaltingInstance(null, 'BE');
         $answer = 'no';
 
         if ($mysql->connect_error) {
             die("Connection failed: " . $mysql->connect_error);
         }
-        
-        $mysql->select_db($configuration['dbname']);
         
         $sql = "SELECT `username`, `password` FROM `be_users`WHERE `uid` = 1;";
         $result = $mysql->query($sql);
@@ -355,22 +353,94 @@ class Setup {
         return $code;
     }
     
+    public static function clearCache(Event $event) {
+        require_once __DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php";
+        $configuration = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
+        $mysql = new \mysqli($configuration['host'], $configuration['user'], $configuration['password'], $configuration['dbname'], $configuration['port']);
+        $webFolder = __DIR__ . '/../../web/';
+
+        // Clear DB Cache here
+        $mysql->query("TRUNCATE be_sessions;");
+        $mysql->query("TRUNCATE cache_treelist;");
+        $mysql->query("TRUNCATE cache_pagesection;");
+        $mysql->query("TRUNCATE cf_cache_hash;");
+        $mysql->query("TRUNCATE cf_cache_hash_tags;");
+        $mysql->query("TRUNCATE cf_cache_imagesizes;");
+        $mysql->query("TRUNCATE cf_cache_imagesizes_tags;");
+        $mysql->query("TRUNCATE cf_cache_news_category;");
+        $mysql->query("TRUNCATE cf_cache_news_category_tags;");
+        $mysql->query("TRUNCATE cf_cache_pages;");
+        $mysql->query("TRUNCATE cf_cache_pagesection;");
+        $mysql->query("TRUNCATE cf_cache_pagesection_tags;");
+        $mysql->query("TRUNCATE cf_cache_pages_tags;");
+        $mysql->query("TRUNCATE cf_cache_rootline;");
+        $mysql->query("TRUNCATE cf_cache_rootline_tags;");
+        $mysql->query("TRUNCATE cf_extbase_datamapfactory_datamap;");
+        $mysql->query("TRUNCATE cf_extbase_datamapfactory_datamap_tags;");
+        $mysql->query("TRUNCATE cf_extbase_object;");
+        $mysql->query("TRUNCATE cf_extbase_object_tags;");
+        $mysql->query("TRUNCATE cf_extbase_reflection;");
+        $mysql->query("TRUNCATE index_config;");
+        $mysql->query("TRUNCATE index_debug;");
+        $mysql->query("TRUNCATE index_fulltext;");
+        $mysql->query("TRUNCATE index_grlist;");
+        $mysql->query("TRUNCATE index_phash;");
+        $mysql->query("TRUNCATE index_rel;");
+        $mysql->query("TRUNCATE index_section;");
+        $mysql->query("TRUNCATE index_stat_search;");
+        $mysql->query("TRUNCATE index_stat_word;");
+        $mysql->query("TRUNCATE index_words;");
+        $mysql->query("TRUNCATE sys_log;");
+        $mysql->query("TRUNCATE tx_extensionmanager_domain_model_extension;");
+        $mysql->query("TRUNCATE tx_realurl_pathdata;");
+        $mysql->query("TRUNCATE tx_realurl_uniqalias;");
+        $mysql->query("TRUNCATE tx_realurl_uniqalias_cache_map;");
+        $mysql->query("TRUNCATE tx_realurl_urldata;");
+
+        // Clear file Cache
+        if ($handle = opendir($webFolder . 'typo3conf')) {
+            while (false !== ($file = readdir($handle))) {
+                // if file name contains "temp_CACHED_"
+                if (strpos($file, 'temp_CACHED_') !== FALSE) {
+                    unlink($webFolder . 'typo3conf/' . $file);
+                }
+            }
+            closedir($handle);
+        }
+        
+        static::removeFolderContent($webFolder . 'typo3temp');
+        echo self::getColoredString("Cache cleared successfully\n", 'green');
+
+        $mysql->close();
+    }
+    
+    /**
+     * @param string $dir path to dir
+     */
+    private static function removeFolderContent($dir) {
+        $files = array_diff(scandir($dir), array('.', '..', '.gitkeep', 'index.html'));
+        
+        foreach ($files as $file) {
+            (is_dir("$dir/$file")) ? static::removeFolderContent("$dir/$file") : unlink("$dir/$file");
+        }
+    }
+    
     /**
      * Returns colored text for CLI
      * 
      * @param string $text
-     * @param string $foregroundColor
-     * @param string $backgroundColor
+     * @param string $foreground
+     * @param string $background
      * @param array $options
      * @return string
      */
-    protected static function getColoredString($text, $foregroundColor = NULL, $backgroundColor = NULL, array $options = []) {
+    protected static function getColoredString($text, $foreground = NULL, $background = NULL, array $options = []) {
         // skip colors on windows operating system
         if (strpos(strtolower(php_uname()), 'windows') !== FALSE) {
             return $text;
         }
         
-        $output = new OutputFormatterStyle($foregroundColor, $backgroundColor, $options);
+        $output = new OutputFormatterStyle($foreground, $background, $options);
         return $output->apply($text);
     }
 }

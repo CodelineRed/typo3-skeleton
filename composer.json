@@ -50,6 +50,7 @@
     },
     "scripts": {
         "setup": "Skeleton\\Composer\\Setup::run",
+        "clear-t3": "Skeleton\\Composer\\Setup::clearCache",
         "post-install-cmd": [
             "@setup"
         ],
