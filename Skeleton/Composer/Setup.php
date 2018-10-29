@@ -2,6 +2,8 @@
 namespace Skeleton\Composer;
 
 use Composer\Script\Event;
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use TYPO3\CMS\Saltedpasswords\Salt\SaltFactory;
 
 class Setup {
     
@@ -16,38 +18,40 @@ class Setup {
             return;
         }
         
+        $saltFactory = SaltFactory::getSaltingInstance(null, 'BE');
+        $stringConfig = "<?php\n";
         $arrConfig = array();
 
         if (!file_exists(__DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php")) {
-            $arrConfig['database'] = array();
+            $arrConfig = [];
 
-            // Ask for database name
-            echo self::getColoredString("Please enter database name (default: ", 'green') . self::getColoredString("imhh_typo3_8", 'yellow') . self::getColoredString("): ", 'green');
+            echo self::getColoredString("Setup Database\n", 'yellow', NULL, ['underscore']);
+            // ask for database name
+            echo self::getColoredString("Please enter database name (default: ", 'green') . self::getColoredString("imhh_typo3", 'yellow') . self::getColoredString("): ", 'green');
             $strHandle = fopen("php://stdin", "r");
             echo "\n";
 
-            $strDbName = trim(fgets($strHandle));
+            $strBuffer = trim(fgets($strHandle));
             fclose($strHandle);
 
-            if (empty($strDbName)) {
-                $arrConfig['database']['dbname'] = "imhh_typo3_8";
+            if (empty($strBuffer)) {
+                $arrConfig['DB']['dbname'] = "imhh_typo3";
             } else {
-                $arrConfig['database']['dbname'] = $strDbName;
+                $arrConfig['DB']['dbname'] = $strBuffer;
             }
-            fclose($strHandle);
 
             // ask for database host
             echo self::getColoredString("Please enter database host (default: ", 'green') . self::getColoredString("127.0.0.1", 'yellow') . self::getColoredString("): ", 'green');
             $strHandle = fopen("php://stdin", "r");
             echo "\n";
 
-            $strHost = trim(fgets($strHandle));
+            $strBuffer = trim(fgets($strHandle));
             fclose($strHandle);
 
-            if (empty($strHost)) {
-                $arrConfig['database']['host'] = "127.0.0.1";
+            if (empty($strBuffer)) {
+                $arrConfig['DB']['host'] = "127.0.0.1";
             } else {
-                $arrConfig['database']['host'] = $strHost;
+                $arrConfig['DB']['host'] = $strBuffer;
             }
 
             // ask for database port
@@ -55,13 +59,13 @@ class Setup {
             $strHandle = fopen("php://stdin", "r");
             echo "\n";
 
-            $intPort = (int)trim(fgets($strHandle));
+            $strBuffer = trim(fgets($strHandle));
             fclose($strHandle);
 
-            if (empty($intPort)) {
-                $arrConfig['database']['port'] = 3306;
+            if (empty($strBuffer)) {
+                $arrConfig['DB']['port'] = 3306;
             } else {
-                $arrConfig['database']['port'] = $intPort;
+                $arrConfig['DB']['port'] = (int)$strBuffer;
             }
 
             // ask for database user
@@ -69,13 +73,13 @@ class Setup {
             $strHandle = fopen("php://stdin", "r");
             echo "\n";
 
-            $strUser = trim(fgets($strHandle));
+            $strBuffer = trim(fgets($strHandle));
             fclose($strHandle);
 
-            if (empty($strUser)) {
-                $arrConfig['database']['user'] = "root";
+            if (empty($strBuffer)) {
+                $arrConfig['DB']['user'] = "root";
             } else {
-                $arrConfig['database']['user'] = $strUser;
+                $arrConfig['DB']['user'] = $strBuffer;
             }
 
             // ask for database password
@@ -83,44 +87,115 @@ class Setup {
             $strHandle = fopen("php://stdin", "r");
             echo "\n";
 
-            $strPassword = trim(fgets($strHandle));
+            $strBuffer = trim(fgets($strHandle));
             fclose($strHandle);
 
-            if (empty($strPassword)) {
-                $arrConfig['database']['password'] = "";
+            if (empty($strBuffer)) {
+                $arrConfig['DB']['password'] = "";
             } else {
-                $arrConfig['database']['password'] = $strPassword;
+                $arrConfig['DB']['password'] = $strBuffer;
             }
 
-            // write AdditionalConfiguration.php
-            file_put_contents(__DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php", '<?php'."\n".'$GLOBALS[\'TYPO3_CONF_VARS\'][\'DB\'][\'database\'] = "' . $arrConfig['database']['database'] . '";'."\n".'$GLOBALS[\'TYPO3_CONF_VARS\'][\'DB\'][\'host\'] = "' . $arrConfig['database']['host'] . '";'."\n".'$GLOBALS[\'TYPO3_CONF_VARS\'][\'DB\'][\'password\'] = "' . $arrConfig['database']['password'] . '";'."\n".'$GLOBALS[\'TYPO3_CONF_VARS\'][\'DB\'][\'port\'] = ' . $arrConfig['database']['port'] . ';'."\n".'$GLOBALS[\'TYPO3_CONF_VARS\'][\'DB\'][\'username\'] = "' . $arrConfig['database']['user'] . '";'."\n".'$GLOBALS[\'TYPO3_CONF_VARS\'][\'DB\'][\'socket\'] = "";'."\n");
+            // ask for database user
+            echo self::getColoredString("Please enter database driver (default: ", 'green') . self::getColoredString("mysqli", 'yellow') . self::getColoredString("): ", 'green');
+            $strHandle = fopen("php://stdin", "r");
+            echo "\n";
 
-            static::createDatabase($arrConfig['database']);
+            $strBuffer = trim(fgets($strHandle));
+            fclose($strHandle);
+
+            if (empty($strBuffer)) {
+                $arrConfig['DB']['driver'] = "mysqli";
+            } else {
+                $arrConfig['DB']['driver'] = $strBuffer;
+            }
+
+            // ask for database user
+            echo self::getColoredString("Please enter database charset (default: ", 'green') . self::getColoredString("utf8", 'yellow') . self::getColoredString("): ", 'green');
+            $strHandle = fopen("php://stdin", "r");
+            echo "\n";
+
+            $strBuffer = trim(fgets($strHandle));
+            fclose($strHandle);
+
+            if (empty($strBuffer)) {
+                $arrConfig['DB']['charset'] = "utf8";
+            } else {
+                $arrConfig['DB']['charset'] = $strBuffer;
+            }
+
+            echo self::getColoredString("Setup Backend\n", 'yellow', NULL, ['underscore']);
+            // ask for install tool password
+            echo self::getColoredString("Please enter install tool password (default: ", 'green') . self::getColoredString("generate random password", 'yellow') . self::getColoredString("): ", 'green');
+            $strHandle = fopen("php://stdin", "r");
+            echo "\n";
+
+            $strBuffer = trim(fgets($strHandle));
+            fclose($strHandle);
+
+            if (empty($strBuffer)) {
+                $arrConfig['BE']['installToolPassword'] = self::generateCode();
+                echo self::getColoredString("Auto generated install tool password: ", 'green') . self::getColoredString($arrConfig['BE']['installToolPassword'] . "\n", 'yellow');
+            } else {
+                $arrConfig['BE']['installToolPassword'] = $strBuffer;
+            }
+            
+            $arrConfig['BE']['installToolPassword'] = $saltFactory->getHashedPassword($arrConfig['BE']['installToolPassword']);
+
+            // write AdditionalConfiguration.php
+            $stringConfig .= "# Backend Config\n";
+            $stringConfig .= "\$GLOBALS['TYPO3_CONF_VARS']['BE']['installToolPassword'] = '" . $arrConfig['BE']['installToolPassword'] . "';\n";
+            $stringConfig .= "\n";
+            $stringConfig .= "# Frontend Config\n";
+            $stringConfig .= "\$GLOBALS['TYPO3_CONF_VARS']['FE']['pageNotFoundOnCHashError'] = FALSE;\n";
+            $stringConfig .= "\$GLOBALS['TYPO3_CONF_VARS']['FE']['hidePagesIfNotTranslatedByDefault'] = TRUE;\n";
+            $stringConfig .= "\n";
+            $stringConfig .= "# Database Config\n";
+            $stringConfig .= "\$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['dbname'] = '" . $arrConfig['DB']['dbname'] . "';\n";
+            $stringConfig .= "\$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['host'] = '" . $arrConfig['DB']['host'] . "';\n";
+            $stringConfig .= "\$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['port'] = " . $arrConfig['DB']['port'] . ";\n";
+            $stringConfig .= "\$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['user'] = '" . $arrConfig['DB']['user'] . "';\n";
+            $stringConfig .= "\$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['password'] = '" . $arrConfig['DB']['password'] . "';\n";
+            $stringConfig .= "\$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['driver'] = '" . $arrConfig['DB']['driver'] . "';\n";
+            $stringConfig .= "\$GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['charset'] = '" . $arrConfig['DB']['charset'] . "';\n";
+            $stringConfig .= "\n";
+            $stringConfig .= "# Image Processing Config\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['GFX']['processor'] = 'ImageMagick';\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['GFX']['processor_allowTemporaryMasksAsPng'] = '';\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['GFX']['processor_colorspace'] = 'sRGB';\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['GFX']['processor_effects'] = '-1';\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['GFX']['processor_enabled'] = '1';\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['GFX']['processor_path'] = '/ImageMagick-7.0.7/bin/';\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['GFX']['processor_path_lzw'] = '/ImageMagick-7.0.7/bin/';\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['GFX']['jpg_quality'] = '80';\n";
+            $stringConfig .= "\n";
+            $stringConfig .= "# Debuging Config\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['SYS']['displayErrors'] = '1';\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['SYS']['devIPmask'] = '*';\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['SYS']['errorHandlerErrors'] = E_ALL ^ E_NOTICE;\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['SYS']['exceptionalErrors'] = E_ALL ^ E_NOTICE ^ E_WARNING ^ E_USER_ERROR ^ E_USER_NOTICE ^ E_USER_WARNING;\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['SYS']['systemLog'] = 'error_log';\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['SYS']['systemLogLevel'] = '4';\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['SYS']['enable_errorDLOG'] = '1';\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['SYS']['enable_exceptionDLOG'] = '1';\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['SYS']['enableDeprecationLog'] = 'console';\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['SYS']['sqlDebug'] = '1';\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['EXT']['extCache'] = '1';\n";
+            $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['BE']['debug'] = '1';\n";
+            
+            file_put_contents(__DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php", $stringConfig);
+
+            static::createDatabase();
         } else {
-            // ask for import
-//            echo "Should the data be importet (y/n): ";
-//            $strHandle = fopen("php://stdin", "r");
-//            echo "\n";
-//
-//            $answer = trim(fgets($strHandle));
-//
-//            if ($answer == 'y' || $answer == 'yes' || $answer == 'Y' || $answer == 'Yes') {
-//                require_once __DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php";
-//                static::importDatabase(array(
-//                    'database'      => $GLOBALS['TYPO3_CONF_VARS']['DB']['dbname'],
-//                    'host'          => $GLOBALS['TYPO3_CONF_VARS']['DB']['host'],
-//                    'port'          => $GLOBALS['TYPO3_CONF_VARS']['DB']['port'],
-//                    'user'          => $GLOBALS['TYPO3_CONF_VARS']['DB']['username'],
-//                    'password'      => $GLOBALS['TYPO3_CONF_VARS']['DB']['password']
-//                ));
-//            }
+            static::importDatabase();
         }
+        
+        static::setBackendUser();
     }
     
-    /**
-     * @param array $configuration
-     */
-    protected static function createDatabase($configuration) {
+    protected static function createDatabase() {
+        require_once __DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php";
+        $configuration = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
         $mysql = new \mysqli($configuration['host'], $configuration['user'], $configuration['password'], '', $configuration['port']);
 
         if ($mysql->connect_error) {
@@ -130,45 +205,128 @@ class Setup {
         $sql = "CREATE DATABASE IF NOT EXISTS `". $configuration['dbname'] . "` CHARACTER SET utf8 COLLATE utf8_general_ci;";
 
         if ($mysql->query($sql) === TRUE) {
-            self::getColoredString("Database created successfully\n", 'green');
+            echo self::getColoredString("Database created successfully\n", 'green');
         } else {
             echo self::getColoredString("Error creating database: " . $mysql->error . "\n", 'red');
         }
 
         $mysql->close();
 
-//        static::importDatabase($configuration);
+        static::importDatabase();
     }
     
-    /**
-     * @param array $configuration
-     */
-    protected static function importDatabase($configuration) {
-        $mysql = new \mysqli($configuration['host'], $configuration['user'], $configuration['password'], $configuration['dbname'], $configuration['port']);
+    protected static function importDatabase() {
+        echo self::getColoredString("Should database reset to default records (default: ", 'green') . self::getColoredString("no", 'yellow') . self::getColoredString("): ", 'green');
+        $strHandle = fopen("php://stdin", "r");
+        echo "\n";
+
+        $answer = strtolower(trim(fgets($strHandle)));
+        fclose($strHandle);
+
+        if ($answer === 'y' || $answer === 'yes') {
+            require_once __DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php";
+            $configuration = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
+        
+            $mysql = new \mysqli($configuration['host'], $configuration['user'], $configuration['password'], $configuration['dbname'], $configuration['port']);
+
+            if ($mysql->connect_error) {
+                die("Connection failed: " . $mysql->connect_error);
+            }
+
+            // Temporary variable, used to store current query
+            $templine = '';
+            // Read in entire file
+            $lines = file(__DIR__ . "/../../sql/db-dump.sql");
+            // Loop through each line
+            foreach ($lines as $line) {
+                // Skip it if it's a comment
+                if (substr($line, 0, 2) == '--' || $line == '') {
+                    continue;
+                }
+
+                // Add this line to the current segment
+                $templine .= $line;
+                // If it has a semicolon at the end, it's the end of the query
+                if (substr(trim($line), -1, 1) == ';') {
+                    // Perform the query
+                    $mysql->query($templine) or print('Error performing query ' . $templine . '\': ' . $mysql->error . "\n");
+                    // Reset temp variable to empty
+                    $templine = '';
+                }
+            }
+
+            $mysql->close();
+        }
+    }
+    
+    protected static function setBackendUser() {
+        require_once __DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php";
+        $configuration = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
+        $mysql = new \mysqli($configuration['host'], $configuration['user'], $configuration['password'], '', $configuration['port']);
+        $saltFactory = SaltFactory::getSaltingInstance(null, 'BE');
+        $answer = 'no';
 
         if ($mysql->connect_error) {
             die("Connection failed: " . $mysql->connect_error);
         }
+        
+        $mysql->select_db($configuration['dbname']);
+        
+        $sql = "SELECT `username`, `password` FROM `be_users`WHERE `uid` = 1;";
+        $result = $mysql->query($sql);
+        while ($row = $result->fetch_assoc()) {
+            $user = $row;
+        }
+        
+        if (!empty($user['password'])) {
+            echo self::getColoredString("Should backend user be overwritten (default: ", 'green') . self::getColoredString("no", 'yellow') . self::getColoredString("): ", 'green');
+            $strHandle = fopen("php://stdin", "r");
+            echo "\n";
+            $answer = strtolower(trim(fgets($strHandle)));
+            fclose($strHandle);
+        }
+        
+        if (empty($user['password']) || $answer === 'y' || $answer === 'yes') {
+            echo self::getColoredString("Setup Backend User\n", 'yellow', NULL, ['underscore']);
+            
+            // ask for backend user name
+            do {
+                echo self::getColoredString("Please enter backend user name: ", 'green');
+                $strHandle = fopen("php://stdin", "r");
+                echo "\n";
 
-        // Temporary variable, used to store current query
-        $templine = '';
-        // Read in entire file
-        $lines = file(__DIR__ . "/../dump.sql");
-        // Loop through each line
-        foreach ($lines as $line) {
-            // Skip it if it's a comment
-            if (substr($line, 0, 2) == '--' || $line == '') {
-                continue;
-            }
+                $username = trim(fgets($strHandle));
+                fclose($strHandle);
 
-            // Add this line to the current segment
-            $templine .= $line;
-            // If it has a semicolon at the end, it's the end of the query
-            if (substr(trim($line), -1, 1) == ';') {
-                // Perform the query
-                $mysql->query($templine) or print('Error performing query ' . $templine . '\': ' . $mysql->error . "\n");
-                // Reset temp variable to empty
-                $templine = '';
+            } while (empty($username));
+
+            // ask for backend user password
+            do {
+                echo self::getColoredString("Please enter backend user password: ", 'green');
+                $strHandle = fopen("php://stdin", "r");
+                echo "\n";
+                
+                // if is OS X or Linux - hide user input
+                if (preg_match('/(darwin|linux)/i', PHP_OS)) {
+                    system('stty -echo');
+                    $password = trim(fgets($strHandle));
+                    system('stty echo');
+                } else {
+                    $password = trim(fgets($strHandle));
+                }
+                
+                fclose($strHandle);
+
+            } while (empty($password));
+
+            $password = $saltFactory->getHashedPassword($password);
+
+            $sql = "UPDATE `be_users` SET `username` = '" . $username . "', `password` = '" . $password . "' WHERE `uid` = 1;";
+
+            if ($mysql->query($sql) === TRUE) {
+                echo self::getColoredString("Backend user created successfully\n", 'green');
+            } else {
+                echo self::getColoredString("Error: " . $mysql->error . "\n", 'red');
             }
         }
 
@@ -176,64 +334,43 @@ class Setup {
     }
     
     /**
-     * Returns colored text for CLI
+     * Generates random code
      * 
-     * @param string $string
-     * @param string $foregroundColor
-     * @param string $backgroundColor
+     * @param integer $length
      * @return string
      */
-    protected static function getColoredString($string, $foregroundColor = null, $backgroundColor = null) {
+    public static function generateCode($length = 18) {
+        $chars = 'abcdefghijkmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.:;_-#@';
+        srand((double)microtime()*1000000);
+        $i = 0;
+        $code = '' ;
+
+        while ($i <= $length) {
+            $num = rand() % 70;
+            $tmp = substr($chars, $num, 1);
+            $code = $code . $tmp;
+            $i++;
+        }
+
+        return $code;
+    }
+    
+    /**
+     * Returns colored text for CLI
+     * 
+     * @param string $text
+     * @param string $foregroundColor
+     * @param string $backgroundColor
+     * @param array $options
+     * @return string
+     */
+    protected static function getColoredString($text, $foregroundColor = NULL, $backgroundColor = NULL, array $options = []) {
         // skip colors on windows operating system
         if (strpos(strtolower(php_uname()), 'windows') !== FALSE) {
-            return $string;
+            return $text;
         }
         
-        $foregroundColors = [
-            'default' => '0',
-            'black' => '0;30',
-            'dark_gray' => '1;30',
-            'blue' => '0;34',
-            'light_blue' => '1;34',
-            'green' => '0;32',
-            'light_green' => '1;32',
-            'cyan' => '0;36',
-            'light_cyan' => '1;36',
-            'red' => '0;31',
-            'light_red' => '1;31',
-            'purple' => '0;35',
-            'light_purple' => '1;35',
-            'brown' => '0;33',
-            'yellow' => '0;33',
-            'light_gray' => '0;37',
-            'white' => '1;37',
-        ];
-        
-        $backgroundColors = [
-            'black' => '40',
-            'red' => '41',
-            'green' => '42',
-            'yellow' => '43',
-            'blue' => '44',
-            'magenta' => '45',
-            'cyan' => '46',
-            'light_gray' => '47'
-        ];
-
-        $coloredString = "";
-
-        // if given foreground color exists
-        if (isset($foregroundColors[$foregroundColor])) {
-            $coloredString .= "\033[" . $foregroundColors[$foregroundColor] . "m";
-        }
-        // if given background color exists
-        if (isset($backgroundColors[$backgroundColor])) {
-            $coloredString .= "\033[" . $backgroundColors[$backgroundColor] . "m";
-        }
-
-        // set default color at the end
-        $coloredString .= $string . "\033[0m";
-
-        return $coloredString;
+        $output = new OutputFormatterStyle($foregroundColor, $backgroundColor, $options);
+        return $output->apply($text);
     }
 }
