@@ -26,6 +26,7 @@
         "helhum/typo3-console": "*",
         "insanitymeetshh/imhh-t3base": "dev-master",
         "insanitymeetshh/bootstrap-grids": "^2.0",
+        "symfony/console": "^3.4 || ^4.0",
         "typo3/cms": "^8.7",
         "typo3-ter/realurl": "*",
         "typo3-ter/scriptmerger": "*",
@@ -50,7 +51,7 @@
     },
     "scripts": {
         "setup": "Skeleton\\Composer\\Setup::run",
-        "clear-t3": "Skeleton\\Composer\\Setup::clearCache",
+        "clear-typo3": "Skeleton\\Composer\\Setup::clearCache",
         "post-install-cmd": [
             "@setup"
         ],
