@@ -98,6 +98,9 @@ return [
         'filemetadata' => [
             'packagePath' => 'typo3/sysext/filemetadata/',
         ],
+        'form' => [
+            'packagePath' => 'typo3/sysext/form/',
+        ],
         'lowlevel' => [
             'packagePath' => 'typo3/sysext/lowlevel/',
         ],

@@ -18,12 +18,35 @@ class Setup {
             return;
         }
         
+        if (!file_exists(__DIR__ . "/../../web/typo3conf/LocalConfiguration.php") 
+                && file_exists(__DIR__ . "/../../web/typo3conf/LocalConfiguration.dist.php")) {
+            echo self::getColoredString("LocalConfiguration.php was created!\n", 'green');
+            copy(__DIR__ . "/../../web/typo3conf/LocalConfiguration.dist.php", __DIR__ . "/../../web/typo3conf/LocalConfiguration.php");
+        } elseif (!file_exists(__DIR__ . "/../../web/typo3conf/LocalConfiguration.dist.php")) {
+            echo self::getColoredString("LocalConfiguration.dist.php is missing!\n", 'green');
+        }
+        
         $saltFactory = SaltFactory::getSaltingInstance(null, 'BE');
         $stringConfig = "<?php\n";
         $arrConfig = array();
 
         if (!file_exists(__DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php")) {
             $arrConfig = [];
+
+            echo self::getColoredString("Setup System\n", 'yellow', NULL, ['underscore']);
+            // ask for database name
+            echo self::getColoredString("Please enter site name (default: ", 'green') . self::getColoredString("New TYPO3 Website", 'yellow') . self::getColoredString("): ", 'green');
+            $strHandle = fopen("php://stdin", "r");
+            echo "\n";
+
+            $strBuffer = trim(fgets($strHandle));
+            fclose($strHandle);
+
+            if (empty($strBuffer)) {
+                $arrConfig['SYS']['sitename'] = "New TYPO3 Website";
+            } else {
+                $arrConfig['SYS']['sitename'] = $strBuffer;
+            }
 
             echo self::getColoredString("Setup Database\n", 'yellow', NULL, ['underscore']);
             // ask for database name
@@ -143,6 +166,9 @@ class Setup {
             $arrConfig['BE']['installToolPassword'] = $saltFactory->getHashedPassword($arrConfig['BE']['installToolPassword']);
 
             // write AdditionalConfiguration.php
+            $stringConfig .= "# System Config\n";
+            $stringConfig .= "\$GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename'] = '" . $arrConfig['SYS']['sitename'] . "';\n";
+            $stringConfig .= "\n";
             $stringConfig .= "# Backend Config\n";
             $stringConfig .= "\$GLOBALS['TYPO3_CONF_VARS']['BE']['installToolPassword'] = '" . $arrConfig['BE']['installToolPassword'] . "';\n";
             $stringConfig .= "\n";
@@ -380,6 +406,7 @@ class Setup {
         $mysql->query("TRUNCATE cf_extbase_object;");
         $mysql->query("TRUNCATE cf_extbase_object_tags;");
         $mysql->query("TRUNCATE cf_extbase_reflection;");
+        $mysql->query("TRUNCATE fe_sessions;");
         $mysql->query("TRUNCATE index_config;");
         $mysql->query("TRUNCATE index_debug;");
         $mysql->query("TRUNCATE index_fulltext;");
@@ -391,6 +418,8 @@ class Setup {
         $mysql->query("TRUNCATE index_stat_word;");
         $mysql->query("TRUNCATE index_words;");
         $mysql->query("TRUNCATE sys_log;");
+        $mysql->query("TRUNCATE sys_file_processedfile;");
+        $mysql->query("TRUNCATE sys_history;");
         $mysql->query("TRUNCATE tx_extensionmanager_domain_model_extension;");
         $mysql->query("TRUNCATE tx_realurl_pathdata;");
         $mysql->query("TRUNCATE tx_realurl_uniqalias;");

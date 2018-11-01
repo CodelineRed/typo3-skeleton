@@ -1,6 +1,9 @@
 <?php
+# System Config
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename'] = 'New TYPO3 Website';
+
 # Backend Config
-//$GLOBALS['TYPO3_CONF_VARS']['BE']['installToolPassword'] = '';
+$GLOBALS['TYPO3_CONF_VARS']['BE']['installToolPassword'] = '';
 
 # Frontend Config
 $GLOBALS['TYPO3_CONF_VARS']['FE']['pageNotFoundOnCHashError'] = FALSE;
