@@ -1,4 +1,4 @@
-# TYPO3 8 LTS - InsanityMeetsHH
+# TYPO3 8.7 LTS Skeleton - InsanityMeetsHH
 
 ## Included
 * [Bootstrap 4 Grids](https://github.com/InsanityMeetsHH/bootstrap_grids)
@@ -26,10 +26,11 @@ $ composer create-project insanitymeetshh/typo3-skeleton [my-app-name]
 * `$ docker run --rm --env docker=true --interactive --tty --volume $PWD:/app composer update`
 * `$ docker-compose build`
 * `$ docker-compose up -d`
-* `$ touch web/typo3conf/FIRST_INSTALL`
 * `$ docker inspect typo3-8-db | grep IPAddress` and set IP address at the install process.
 * Open [localhost:8080](http://localhost:8080) for website or [localhost:9999](http://localhost:9999) for database gui
 * If you want to remove a container `$ docker rm [container-name] -f` e.g. `$ docker rm typo3-8-db -f`
 * If you want to remove a volume `$ docker volume rm [volume-name]` e.g. `$ docker volume rm imhh-typo3_db_data` (first remove matching container)
 * If you want to remove all container `$ docker rm $(docker ps -a -q) -f`
 * If you want to remove all volumes `$ docker volume prune` (first remove all container)
+
+### This skeleton is under development

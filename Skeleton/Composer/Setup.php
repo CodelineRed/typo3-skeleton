@@ -382,13 +382,13 @@ class Setup {
     public static function clearCache(Event $event) {
         require_once __DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php";
         $configuration = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
+        var_dump($configuration);
         $mysql = new \mysqli($configuration['host'], $configuration['user'], $configuration['password'], $configuration['dbname'], $configuration['port']);
         $webFolder = __DIR__ . '/../../web/';
 
         // Clear DB Cache here
         $mysql->query("TRUNCATE be_sessions;");
         $mysql->query("TRUNCATE cache_treelist;");
-        $mysql->query("TRUNCATE cache_pagesection;");
         $mysql->query("TRUNCATE cf_cache_hash;");
         $mysql->query("TRUNCATE cf_cache_hash_tags;");
         $mysql->query("TRUNCATE cf_cache_imagesizes;");
