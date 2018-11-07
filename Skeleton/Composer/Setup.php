@@ -7,22 +7,54 @@ use TYPO3\CMS\Saltedpasswords\Salt\SaltFactory;
 
 class Setup {
     
+    /** @var string $webDir */
+    public static $webDir = '';
+    
+    /**
+     * Invokes before static method is called
+     * 
+     * @param string $method
+     * @param array $parameters
+     */
+    public static function __callStatic($method, $parameters){
+        echo __CLASS__ . "::" . $method;
+        if (method_exists(__CLASS__, $method)) {
+            if (file_exists(__DIR__ . '/../../composer.json')) {
+                if (is_readable(__DIR__ . '/../../composer.json')) {
+                    $composer = json_decode(file_get_contents(__DIR__ . '/../../composer.json'), TRUE);
+                    self::$webDir = __DIR__ . '/../../' . $composer['extra']['typo3/cms']['web-dir'] . '/';
+                    
+                    if (is_dir(self::$webDir)) {
+                        forward_static_call_array(array(__CLASS__,$method),$parameters);
+                    } else {
+                        echo self::getColoredString("Web directory is missing.\n", 'white', 'red');
+                    }
+                } else {
+                    echo self::getColoredString("composer.json is missing.\n", 'white', 'red');
+                }
+            } else {
+                echo self::getColoredString("composer.json is missing.\n", 'white', 'red');
+            }
+        }
+    }
+    
     /**
      * Generates AdditionalConfiguration.php and set up database
      * 
      * @param Event $event
      */
-    public static function run(Event $event) {
+    private static function run(Event $event) {
+        echo "\n";
         if (isset($_ENV['docker'])) {
             echo self::getColoredString("Skipped App\\Composer\\Setup in Docker environment.\n", 'green');
             return;
         }
         
-        if (!file_exists(__DIR__ . "/../../web/typo3conf/LocalConfiguration.php") 
-                && file_exists(__DIR__ . "/../../web/typo3conf/LocalConfiguration.dist.php")) {
+        if (!file_exists(self::$webDir . "typo3conf/LocalConfiguration.php") 
+                && file_exists(self::$webDir . "typo3conf/LocalConfiguration.dist.php")) {
             echo self::getColoredString("LocalConfiguration.php was created!\n", 'green');
-            copy(__DIR__ . "/../../web/typo3conf/LocalConfiguration.dist.php", __DIR__ . "/../../web/typo3conf/LocalConfiguration.php");
-        } elseif (!file_exists(__DIR__ . "/../../web/typo3conf/LocalConfiguration.dist.php")) {
+            copy(self::$webDir . "typo3conf/LocalConfiguration.dist.php", self::$webDir . "typo3conf/LocalConfiguration.php");
+        } elseif (!file_exists(self::$webDir . "typo3conf/LocalConfiguration.dist.php")) {
             echo self::getColoredString("LocalConfiguration.dist.php is missing!\n", 'green');
         }
         
@@ -30,7 +62,7 @@ class Setup {
         $stringConfig = "<?php\n";
         $arrConfig = array();
 
-        if (!file_exists(__DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php")) {
+        if (!file_exists(self::$webDir . "typo3conf/AdditionalConfiguration.php")) {
             $arrConfig = [];
 
             echo self::getColoredString("Setup System\n", 'yellow', NULL, ['underscore']);
@@ -209,7 +241,7 @@ class Setup {
             $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['EXT']['extCache'] = '1';\n";
             $stringConfig .= "//\$GLOBALS['TYPO3_CONF_VARS']['BE']['debug'] = '1';\n";
             
-            file_put_contents(__DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php", $stringConfig);
+            file_put_contents(self::$webDir . "typo3conf/AdditionalConfiguration.php", $stringConfig);
 
             static::createDatabase();
         } else {
@@ -220,7 +252,7 @@ class Setup {
     }
     
     protected static function createDatabase() {
-        require_once __DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php";
+        require_once self::$webDir . "typo3conf/AdditionalConfiguration.php";
         $configuration = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
         $mysql = new \mysqli($configuration['host'], $configuration['user'], $configuration['password'], '', $configuration['port']);
 
@@ -250,7 +282,7 @@ class Setup {
         fclose($strHandle);
 
         if ($answer === 'y' || $answer === 'yes') {
-            require_once __DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php";
+            require_once self::$webDir . "typo3conf/AdditionalConfiguration.php";
             $configuration = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
         
             $mysql = new \mysqli($configuration['host'], $configuration['user'], $configuration['password'], $configuration['dbname'], $configuration['port']);
@@ -286,7 +318,17 @@ class Setup {
     }
     
     protected static function setBackendUser() {
-        require_once __DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php";
+        if (!isset($GLOBALS['TYPO3_CONF_VARS'])) {
+            $GLOBALS['TYPO3_CONF_VARS'] = [];
+        }
+        
+        $localConfiguration = require self::$webDir . 'typo3conf/LocalConfiguration.php';
+        $GLOBALS['TYPO3_CONF_VARS'] = array_replace_recursive($GLOBALS['TYPO3_CONF_VARS'], $localConfiguration);
+
+        if (is_readable(self::$webDir . 'typo3conf/AdditionalConfiguration.php')) {
+            require self::$webDir . 'typo3conf/AdditionalConfiguration.php';
+        }
+        
         $configuration = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
         $mysql = new \mysqli($configuration['host'], $configuration['user'], $configuration['password'], $configuration['dbname'], $configuration['port']);
         $saltFactory = SaltFactory::getSaltingInstance(null, 'BE');
@@ -363,7 +405,7 @@ class Setup {
      * @param integer $length
      * @return string
      */
-    public static function generateCode($length = 18) {
+    private static function generateCode($length = 18) {
         $chars = 'abcdefghijkmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.:;_-#@';
         srand((double)microtime()*1000000);
         $i = 0;
@@ -379,12 +421,21 @@ class Setup {
         return $code;
     }
     
-    public static function clearCache(Event $event) {
-        require_once __DIR__ . "/../../web/typo3conf/AdditionalConfiguration.php";
+    private static function clearCache(Event $event) {
+        echo "\n";
+        if (!isset($GLOBALS['TYPO3_CONF_VARS'])) {
+            $GLOBALS['TYPO3_CONF_VARS'] = [];
+        }
+        
+        $localConfiguration = require self::$webDir . 'typo3conf/LocalConfiguration.php';
+        $GLOBALS['TYPO3_CONF_VARS'] = array_replace_recursive($GLOBALS['TYPO3_CONF_VARS'], $localConfiguration);
+
+        if (is_readable(self::$webDir . 'typo3conf/AdditionalConfiguration.php')) {
+            require self::$webDir . 'typo3conf/AdditionalConfiguration.php';
+        }
+
         $configuration = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
-        var_dump($configuration);
         $mysql = new \mysqli($configuration['host'], $configuration['user'], $configuration['password'], $configuration['dbname'], $configuration['port']);
-        $webFolder = __DIR__ . '/../../web/';
 
         // Clear DB Cache here
         $mysql->query("TRUNCATE be_sessions;");
@@ -427,17 +478,17 @@ class Setup {
         $mysql->query("TRUNCATE tx_realurl_urldata;");
 
         // Clear file Cache
-        if ($handle = opendir($webFolder . 'typo3conf')) {
+        if ($handle = opendir(self::$webDir . 'typo3conf')) {
             while (false !== ($file = readdir($handle))) {
                 // if file name contains "temp_CACHED_"
                 if (strpos($file, 'temp_CACHED_') !== FALSE) {
-                    unlink($webFolder . 'typo3conf/' . $file);
+                    unlink(self::$webDir . 'typo3conf/' . $file);
                 }
             }
             closedir($handle);
         }
         
-        static::removeFolderContent($webFolder . 'typo3temp');
+        static::removeFolderContent(self::$webDir . 'typo3temp');
         echo self::getColoredString("Cache cleared successfully\n", 'green');
 
         $mysql->close();
